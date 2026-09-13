@@ -7,6 +7,7 @@
         "description": "Please enter the basic configuration to begin.",
         "data": {
           "custom_longitude": "Geographic Longitude",
+          "custom_latitude": "Geographic Latitude",
           "refresh_interval": "Refresh Interval (minutes)"
         }
       }
@@ -18,6 +19,7 @@
         "title": "TianYuan Lunar Calendar Advanced Settings",
         "data": {
           "custom_longitude": "Geographic Longitude (for True Solar Time calibration)",
+          "custom_latitude": "Geographic Latitude",
           "refresh_interval": "Refresh Interval (minutes)",
           "calc_mode": "Calculation Mode",
           "enable_more": "Enable Additional Advanced Entities",
@@ -71,7 +73,18 @@
         "name": "Shi Er Shi Chen"
       },
       "tst_time": {
-        "name": "True Solar Time"
+        "name": "True Solar Time",
+        "state_attributes": {
+          "solar_time": { "name": "Solar Time" },
+          "longitude": { "name": "Longitude" },
+          "latitude": { "name": "Latitude" },
+          "solar_altitude": { "name": "Solar Altitude" },
+          "solar_azimuth": { "name": "Solar Azimuth" },
+          "solar_declination": { "name": "Solar Declination" },
+          "sunrise": { "name": "Sunrise" },
+          "sunset": { "name": "Sunset" },
+          "daylight_duration": { "name": "Daylight Duration" }
+        }
       },
       "sizhu_bazi": {
         "name": "Four Pillars of Destiny"

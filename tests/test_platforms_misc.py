@@ -5,15 +5,15 @@ from __future__ import annotations
 from datetime import date
 from unittest.mock import AsyncMock
 
-from custom_components.tianyuan_calendar.text import (
+from custom_components.tianyuan_calendar_duo.text import (
     TianYuanTextEntityDescription,
     TianYuanLiuYaoInput,
 )
-from custom_components.tianyuan_calendar.button import (
+from custom_components.tianyuan_calendar_duo.button import (
     TIANYUAN_BUTTONS,
     TianYuanTodayButton,
 )
-from custom_components.tianyuan_calendar.date import (
+from custom_components.tianyuan_calendar_duo.date import (
     TIANYUAN_DATE_ENTITIES,
     TianYuanDateNavigator,
 )

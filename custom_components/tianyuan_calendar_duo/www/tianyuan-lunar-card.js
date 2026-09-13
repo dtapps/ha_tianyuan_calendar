@@ -160,7 +160,7 @@
         <ha-form
           .hass=${this._hass}
           .data=${this.config}
-          .schema=${[{ name: "entity", label: "选择天元农历实体", selector: { entity: { domain: "sensor", integration: "tianyuan_calendar" } } }]}
+          .schema=${[{ name: "entity", label: "选择天元农历实体", selector: { entity: { domain: "sensor", integration: "tianyuan_calendar_duo" } } }]}
           .computeLabel=${s => s.label}
           @value-changed=${e => this._upd(e.detail.value)}
         ></ha-form>

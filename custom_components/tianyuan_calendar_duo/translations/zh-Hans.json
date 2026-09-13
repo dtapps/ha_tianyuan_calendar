@@ -7,6 +7,7 @@
         "description": "请输入基础配置信息以开始。",
         "data": {
           "custom_longitude": "地理经度",
+          "custom_latitude": "地理纬度",
           "refresh_interval": "刷新频率 (分钟)"
         }
       }
@@ -18,6 +19,7 @@
         "title": "天元历法高级设置",
         "data": {
           "custom_longitude": "地理经度 (用于真太阳时校准)",
+          "custom_latitude": "地理纬度",
           "refresh_interval": "刷新频率 (分钟)",
           "calc_mode": "计算基准模式",
           "enable_more": "开启更多高级实体",
@@ -71,7 +73,18 @@
         "name": "十二时辰"
       },
       "tst_time": {
-        "name": "真太阳时"
+        "name": "真太阳时",
+        "state_attributes": {
+          "solar_time": { "name": "太阳时" },
+          "longitude": { "name": "经度" },
+          "latitude": { "name": "纬度" },
+          "solar_altitude": { "name": "太阳高度角" },
+          "solar_azimuth": { "name": "太阳方位角" },
+          "solar_declination": { "name": "太阳赤纬" },
+          "sunrise": { "name": "日出" },
+          "sunset": { "name": "日落" },
+          "daylight_duration": { "name": "白昼时长" }
+        }
       },
       "sizhu_bazi": {
         "name": "四柱八字"

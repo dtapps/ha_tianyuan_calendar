@@ -1,0 +1,14 @@
+{
+  "domain": "tianyuan_calendar_duo",
+  "name": "TianYuan Calendar Duo",
+  "codeowners": ["@dtapps"],
+  "config_flow": true,
+  "dependencies": ["http", "frontend"],
+  "documentation": "https://github.com/dtapps/ha_tianyuan_calendar",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/dtapps/ha_tianyuan_calendar/issues",
+  "requirements": ["lunar-python==1.4.8"],
+  "single_config_entry": false,
+  "version": "1.1.9"
+}

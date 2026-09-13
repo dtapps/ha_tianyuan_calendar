@@ -1,7 +1,8 @@
 """天元历法引擎 - 处理农历、假期、节气及实体属性组装."""
 from __future__ import annotations
 
-from datetime import datetime
+import math
+from datetime import datetime, timedelta
 from typing import Any
 from lunar_python import Lunar, Solar, LunarTime
 from lunar_python.util import HolidayUtil
@@ -160,11 +161,67 @@ class 天元农历逻辑类:
         return 关系表.get(zhi, {"六合": "无", "三合": "无", "相冲": "无", "相刑": "无", "相害": "无", "相破": "无"})
 
     @staticmethod
-    def 获取更多实体类(农历: Lunar, 真太阳时: datetime, 性别: str) -> dict:
+    @staticmethod
+    def 计算太阳位置类(真太阳时: datetime, 纬度: float, 经度: float) -> dict:
+        """基于纬度 + 真太阳时计算太阳地平坐标与日出日落（纯本地天文近似）
+
+        配合数据：纬度 φ（新配置项）+ 真太阳时（已含经度时差）+ 太阳赤纬 δ（由日序推算，无需天文库）。
+        高度角 α = asin(sinφ·sinδ + cosφ·cosδ·cosH)，H 为真太阳时对应的时角。
+        """
+        N = 真太阳时.timetuple().tm_yday
+        B = math.radians(360 / 365 * (N - 81))
+        # 均时差（与 coordinator._计算真太阳时类 保持一致），用于把真太阳时换算回本地标准时
+        时间方程 = 9.87 * math.sin(2 * B) - 7.53 * math.cos(B) - 1.5 * math.sin(B)
+        # 太阳赤纬（Cooper 近似，精度约 ±0.5°）
+        赤纬 = math.radians(23.44 * math.sin(math.radians(360 / 365 * (N + 284))))
+
+        φ = math.radians(纬度)
+        H = math.radians((真太阳时.hour + 真太阳时.minute / 60 + 真太阳时.second / 3600 - 12) * 15)
+
+        # 太阳高度角
+        sin_alt = math.sin(φ) * math.sin(赤纬) + math.cos(φ) * math.cos(赤纬) * math.cos(H)
+        sin_alt = max(-1.0, min(1.0, sin_alt))
+        高度角 = math.degrees(math.asin(sin_alt))
+        # 太阳方位角：自正北顺时针（北=0° 东=90° 南=180° 西=270°）
+        # 地平坐标向量公式：北分量 = sinδ·cosφ - cosδ·sinφ·cosH，东分量 = -cosδ·sinH
+        方位角 = math.degrees(math.atan2(
+            -math.cos(赤纬) * math.sin(H),
+            math.sin(赤纬) * math.cos(φ) - math.cos(赤纬) * math.sin(φ) * math.cos(H),
+        ))
+        if 方位角 < 0:
+            方位角 += 360
+
+        # 日出 / 日落（半昼时角）
+        cosH0 = -math.tan(φ) * math.tan(赤纬)
+        偏移分钟 = (经度 - 120) * 4 + 时间方程  # 真太阳时 -> 本地标准时的线性偏移
+        noon_tst = 真太阳时.replace(hour=12, minute=0, second=0, microsecond=0)
+        if cosH0 > 1:
+            日出, 日落, 白昼 = "极夜（太阳全天不升起）", "极夜（太阳全天不升起）", "0 小时"
+        elif cosH0 < -1:
+            日出, 日落, 白昼 = "极昼（太阳全天不落下）", "极昼（太阳全天不落下）", "24 小时"
+        else:
+            H0 = math.degrees(math.acos(max(-1.0, min(1.0, cosH0))))
+            H0_h = H0 / 15
+            日出_dt = noon_tst - timedelta(hours=H0_h) - timedelta(minutes=偏移分钟)
+            日落_dt = noon_tst + timedelta(hours=H0_h) - timedelta(minutes=偏移分钟)
+            日出, 日落, 白昼 = 日出_dt.strftime("%H:%M"), 日落_dt.strftime("%H:%M"), f"{H0_h * 2:.2f} 小时"
+
+        return {
+            "solar_altitude": f"{高度角:.2f}°",
+            "solar_azimuth": f"{方位角:.2f}°",
+            "solar_declination": f"{math.degrees(赤纬):.2f}°",
+            "sunrise": 日出,
+            "sunset": 日落,
+            "daylight_duration": 白昼,
+        }
+
+    def 获取更多实体类(农历: Lunar, 真太阳时: datetime, 性别: str, 纬度: float | None = None, 经度: float | None = None) -> dict:
         """组装更多农历扩展实体"""
         八字 = 农历.getEightChar()
         关系 = 天元农历逻辑类.计算生肖动合关系类(农历.getDayZhiExact2())
-        
+        # 纬度参与计算：高度角/方位角/日出日落（仅当用户配置了经纬度时）
+        太阳位置属性 = 天元农历逻辑类.计算太阳位置类(真太阳时, 纬度, 经度) if (纬度 is not None and 经度 is not None) else {}
+
         return {
             "真太阳时数据": {
                 "state": f"{农历.getTimeZhi()}时",
@@ -175,7 +232,8 @@ class 天元农历逻辑类:
                     "冲煞": f"冲{农历.getTimeChongDesc()} 煞{农历.getTimeSha()}",
                     "宜": ". ".join(农历.getTimeYi()) if 农历.getTimeYi() else "无",
                     "忌": ". ".join(农历.getTimeJi()) if 农历.getTimeJi() else "无",
-                    "太阳时": 真太阳时.strftime("%H:%M")
+                    "solar_time": 真太阳时.strftime("%H:%M"),
+                    **太阳位置属性
                 }
             },
             "四柱八字数据": {

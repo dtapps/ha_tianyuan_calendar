@@ -13,6 +13,7 @@ from .const import (
     DOMAIN,
     CONF_REFRESH_INTERVAL,
     CONF_CUSTOM_LONGITUDE,
+    CONF_CUSTOM_LATITUDE,
     CONF_ENABLE_SHUSHU,
     CONF_ENABLE_QIHUANG,
     CONF_ENABLE_SHENGRI,
@@ -32,14 +33,14 @@ class TianYuanConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
-        """初次安装：仅显示经度和频率."""
-        if self._async_current_entries():
-            return self.async_abort(reason="single_instance_allowed")
-
+        """初次安装：显示经纬度与频率（支持添加多个实例）."""
         if user_input is not None:
             # 初始化默认隐藏的选项
+            经度 = float(user_input[CONF_CUSTOM_LONGITUDE])
+            纬度 = float(user_input[CONF_CUSTOM_LATITUDE])
             options = {
-                CONF_CUSTOM_LONGITUDE: float(user_input[CONF_CUSTOM_LONGITUDE]),
+                CONF_CUSTOM_LONGITUDE: 经度,
+                CONF_CUSTOM_LATITUDE: 纬度,
                 CONF_REFRESH_INTERVAL: int(user_input[CONF_REFRESH_INTERVAL]),
                 CONF_ENABLE_QIHUANG: False,
                 CONF_ENABLE_SHUSHU: False,   # 默认关闭
@@ -47,12 +48,18 @@ class TianYuanConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_ENABLE_CARD: False,  # 前端卡片默认关闭，避免全局注册
                 CONF_CALC_MODE: MODE_ST,  # 默认兼容模式
             }
-            return self.async_create_entry(title="TianYuan 天元", data={}, options=options)
+            # 标题按坐标生成，多个实例自动区分
+            title = f"天元 ({纬度:.2f}°N, {经度:.2f}°E)"
+            return self.async_create_entry(title=title, data={}, options=options)
 
         lon = float(self.hass.config.longitude or 120.0)
+        lat = float(self.hass.config.latitude or 39.9)
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({
+                vol.Required(CONF_CUSTOM_LATITUDE, default=lat): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=-90, max=90, step="any", mode=selector.NumberSelectorMode.BOX)
+                ),
                 vol.Required(CONF_CUSTOM_LONGITUDE, default=lon): selector.NumberSelector(
                     selector.NumberSelectorConfig(min=-180, max=180, step="any", mode=selector.NumberSelectorMode.BOX)
                 ),
@@ -92,6 +99,9 @@ class TianYuanOptionsFlowHandler(config_entries.OptionsFlow):
         opts = self.config_entry.options
         schema_dict = {
             # 基础配置
+            vol.Required(CONF_CUSTOM_LATITUDE, default=float(opts.get(CONF_CUSTOM_LATITUDE, 39.9))): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=-90, max=90, step="any", mode=selector.NumberSelectorMode.BOX)
+            ),
             vol.Required(CONF_CUSTOM_LONGITUDE, default=float(opts.get(CONF_CUSTOM_LONGITUDE, 120.0))): selector.NumberSelector(
                 selector.NumberSelectorConfig(min=-180, max=180, step="any", mode=selector.NumberSelectorMode.BOX)
             ),

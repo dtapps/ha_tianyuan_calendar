@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock
 
 from homeassistant.components.calendar import CalendarEvent
 
-from custom_components.tianyuan_calendar.calendar import (
+from custom_components.tianyuan_calendar_duo.calendar import (
     TianYuanCalendarEntityDescription,
     TianYuanCalendarEntity,
 )

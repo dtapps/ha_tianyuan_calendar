@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from homeassistant.const import EntityCategory
 
-from custom_components.tianyuan_calendar.sensor import (
+from custom_components.tianyuan_calendar_duo.sensor import (
     TianYuanSensorEntityDescription,
     TianYuanGenericSensor,
     TianYuanAdvancedSensor,

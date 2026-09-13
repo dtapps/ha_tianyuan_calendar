@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
 
-from custom_components.tianyuan_calendar.select import (
+from custom_components.tianyuan_calendar_duo.select import (
     TianYuanSelectDescription,
     TianYuanQihuangSelect,
     TianYuanShushuSelect,
@@ -12,7 +12,7 @@ from custom_components.tianyuan_calendar.select import (
     SELECT_TYPE_ICHING,
     OPTION_ICHING_SYNC,
 )
-from custom_components.tianyuan_calendar.tianyuan import (
+from custom_components.tianyuan_calendar_duo.tianyuan import (
     辅行诀脏腑用药法要类,
     伤寒杂病论类,
     易经详注类,

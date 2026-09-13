@@ -40,6 +40,7 @@ from .const import (
     LOGGER,
     CONF_REFRESH_INTERVAL,
     CONF_CUSTOM_LONGITUDE,
+    CONF_CUSTOM_LATITUDE,
     CONF_ENABLE_SHUSHU,
     CONF_ENABLE_QIHUANG,
     CONF_CALC_MODE,
@@ -138,6 +139,9 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
 
             模式 = self.entry.options.get(CONF_CALC_MODE, MODE_ST)
             经度 = float(self.entry.options.get(CONF_CUSTOM_LONGITUDE, 120.0))
+            纬度 = float(self.entry.options.get(CONF_CUSTOM_LATITUDE, 39.9))
+            self.经度 = 经度
+            self.纬度 = 纬度
             开启岐黄 = self.entry.options.get(CONF_ENABLE_QIHUANG, False)
             开启术数 = self.entry.options.get(CONF_ENABLE_SHUSHU, False)
 
@@ -148,8 +152,8 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
             tst_date_str = 真太阳时.strftime('%Y-%m-%d')
             时辰名 = 真太阳时农历.getTimeZhi()
 
-            # 获取日级缓存（key 含经度：改经度后无需依赖整集成 reload 来清空缓存）
-            day_key = f"D_{tst_date_str}_{经度}_{模式}"
+            # 获取日级缓存（key 含经纬度：改坐标后无需依赖整集成 reload 来清空缓存）
+            day_key = f"D_{tst_date_str}_{纬度}_{经度}_{模式}"
             日级数据 = await self._cache.get_or_set(
                 day_key,
                 lambda: self.hass.async_add_executor_job(self._获取同步日级基础数据类, 真太阳时, 基准时间, 模式),
@@ -195,7 +199,10 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
         # 按计算模式选择主农历，确保四柱八字（含时柱）与日级基础数据口径一致
         模式 = self.entry.options.get(CONF_CALC_MODE, MODE_ST)
         主农历 = 真太阳时农历 if 模式 == MODE_TST else 标准农历
-        更多实体包 = 天元农历逻辑类.获取更多实体类(真太阳时农历, 真太阳时, self.性别)
+        更多实体包 = 天元农历逻辑类.获取更多实体类(真太阳时农历, 真太阳时, self.性别, self.纬度, self.经度)
+        # 将当前实例配置的经纬度写入真太阳时属性，便于前端核对定位
+        更多实体包["真太阳时数据"]["attributes"]["longitude"] = getattr(self, "经度", 120.0)
+        更多实体包["真太阳时数据"]["attributes"]["latitude"] = getattr(self, "纬度", 39.9)
         # 四柱八字/天干地支含时柱或时辰纳音，必须随时辰刷新：从实时主农历重算，覆盖日级缓存的冻结值
         主更多实体包 = 天元农历逻辑类.获取更多实体类(主农历, 真太阳时, self.性别)
         四柱八字包 = 主更多实体包["四柱八字数据"]
@@ -229,7 +236,7 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
         真太阳时阳历 = Solar.fromDate(真太阳时)
         # 模式判定：决定传感器主实体显示的“宇宙”
         主农历 = 真太阳时农历 if 模式 == MODE_TST else 标准农历
-        更多实体 = 天元农历逻辑类.获取更多实体类(主农历,真太阳时,self.性别)
+        更多实体 = 天元农历逻辑类.获取更多实体类(主农历,真太阳时,self.性别, self.纬度, self.经度)
 
         return {
             "农历": 主农历,

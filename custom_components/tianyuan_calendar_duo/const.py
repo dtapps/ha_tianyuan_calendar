@@ -6,7 +6,7 @@ from typing import Final
 from homeassistant.const import Platform
 
 # 核心集成元数据
-DOMAIN: Final = "tianyuan_calendar"
+DOMAIN: Final = "tianyuan_calendar_duo"
 LOGGER = logging.getLogger(__package__)
 
 # 支持的平台 (整合 SENSOR, SELECT, BUTTON, DATE)
@@ -22,6 +22,7 @@ PLATFORMS: Final = [
 # 配置键名 (用于 Config Flow 和 Options Flow)
 CONF_REFRESH_INTERVAL: Final = "refresh_interval"
 CONF_CUSTOM_LONGITUDE: Final = "custom_longitude"
+CONF_CUSTOM_LATITUDE: Final = "custom_latitude"
 CONF_ENABLE_MORE: Final = "enable_more"
 CONF_CALC_MODE: Final = "calc_mode"
 CONF_SYS_TOKEN: Final = "system_token"
