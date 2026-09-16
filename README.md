@@ -7,6 +7,15 @@
 
 ## 天元历法不再仅仅是历法传感器，它是一个深度整合中国传统“天文、术数、医学”的智能引擎。通过真太阳时修正，为用户提供精确的排盘、取穴与卦象预测。
 
+## 📌 与原项目 (PraxiGEN/ha_tianyuan_calendar) 的区别
+
+本仓库是基于上游 [PraxiGEN/ha_tianyuan_calendar](https://github.com/PraxiGEN/ha_tianyuan_calendar) 的**分支（fork）**。所有历法、术数、岐黄、真太阳时等核心算法与功能均**继承自原项目，未做重新实现**。本分支相对原项目的主要改动只有：
+
+- **支持多实例（多“服务”）**：集成标识由 `tianyuan_calendar` 更名为 `tianyuan_calendar_duo`，并在 `manifest.json` 中将 `single_config_entry` 设为 `false`，允许在同一 Home Assistant 中**多次添加**本集成；每个实例以经纬度自动命名（标题形如 `天元 (纬度°N, 经度°E)`），可同时运行多套互相独立的天元历法（例如为不同家庭成员 / 不同地点各建一个）。
+- **维护信息更新**：`codeowners`、`documentation`、`issue_tracker` 指向本分支维护者 `dtapps`。
+
+> 其余安装、配置、实体说明与原项目一致，请参考下方文档。
+
 ## ✨ 核心特性
 
 ### 系统使用本地数据库作为数据源，所有逻辑均在本地离线计算完成。
