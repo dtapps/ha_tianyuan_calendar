@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       # Validate branch
       - name: Validate branch
         env:

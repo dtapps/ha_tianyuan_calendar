@@ -1,4 +1,5 @@
 """TianYuan 按钮平台."""
+
 from __future__ import annotations
 
 from homeassistant.components.button import (
@@ -17,12 +18,12 @@ from .const import DOMAIN
 TIANYUAN_BUTTONS: tuple[ButtonEntityDescription, ...] = (
     ButtonEntityDescription(
         key="reset_to_today",
-
         translation_key="reset_to_today",
         icon="mdi:calendar-today",
         entity_category=EntityCategory.CONFIG,
     ),
 )
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -37,6 +38,7 @@ async def async_setup_entry(
     ]
 
     async_add_entities(entities)
+
 
 class TianYuanTodayButton(TianYuanBaseEntity, ButtonEntity):
     """重置日期到当前的按钮."""

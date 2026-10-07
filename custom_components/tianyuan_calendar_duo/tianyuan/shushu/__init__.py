@@ -1,4 +1,5 @@
 """天元术数引擎."""
+
 from .base import 天元术数类
 from .xiaoliuren import 小六壬类
 from .meihua import 梅花易数类
