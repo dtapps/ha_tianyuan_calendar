@@ -1,4 +1,5 @@
 """TianYuan 选择器平台."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -27,11 +28,14 @@ from .const import (
     CONF_SYS_TOKEN,
 )
 
+
 @dataclass(frozen=True, kw_only=True)
 class TianYuanSelectDescription(SelectEntityDescription):
     """自定义选择器描述符."""
+
     data_type: str
     is_private: bool = False
+
 
 # 性别：UI 选项值(英文) 与 协调器内部值(中文) 的映射
 # 协调器内部始终以中文「男/女」存储，避免八字乾造/坤造判定错乱
@@ -103,6 +107,7 @@ QIHUANG_SELECT_ENTITIES: tuple[TianYuanSelectDescription, ...] = (
     ),
 )
 
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: TianYuanConfigEntry,
@@ -117,8 +122,8 @@ async def async_setup_entry(
     if conf.get(CONF_ENABLE_SHUSHU):
         for description in SHUSHU_SELECT_ENTITIES:
             entities.append(TianYuanShushuSelect(coordinator, entry, description))
-        
-    if conf.get(CONF_ENABLE_QIHUANG): 
+
+    if conf.get(CONF_ENABLE_QIHUANG):
         for description in QIHUANG_SELECT_ENTITIES:
             if description.is_private and not has_pro_access:
                 continue
@@ -126,20 +131,28 @@ async def async_setup_entry(
 
     async_add_entities(entities)
 
+
 # 术数选择器类 (ShuShu Device)
 class TianYuanShushuSelect(TianYuanShushuBaseEntity, SelectEntity):
     """归属于天元术数设备的选择器。"""
 
     entity_description: TianYuanSelectDescription
 
-    def __init__(self, coordinator: TianYuanCoordinator, entry: TianYuanConfigEntry, description: TianYuanSelectDescription) -> None:
+    def __init__(
+        self,
+        coordinator: TianYuanCoordinator,
+        entry: TianYuanConfigEntry,
+        description: TianYuanSelectDescription,
+    ) -> None:
         super().__init__(coordinator)
         self.entity_description = description
         self._attr_unique_id = f"{entry.entry_id}_{description.key}"
         self._attr_translation_key = description.translation_key
-        
+
         if description.data_type == SELECT_TYPE_ICHING:
-            self._attr_options = [OPTION_ICHING_SYNC] + 易经详注类.获取易经卦象所有卦名类()
+            self._attr_options = [
+                OPTION_ICHING_SYNC
+            ] + 易经详注类.获取易经卦象所有卦名类()
 
     @property
     def current_option(self) -> str | None:
@@ -149,13 +162,19 @@ class TianYuanShushuSelect(TianYuanShushuBaseEntity, SelectEntity):
         target = None if option == OPTION_ICHING_SYNC else option
         await self.coordinator.选择实体选卦名类(target)
 
+
 # 岐黄选择器类 (QiHuang Device)
 class TianYuanQihuangSelect(TianYuanQihuangBaseEntity, SelectEntity):
     """归属于天元岐黄设备的选择器，支持动态级联选项。"""
 
     entity_description: TianYuanSelectDescription
 
-    def __init__(self, coordinator: TianYuanCoordinator, entry: TianYuanConfigEntry, description: TianYuanSelectDescription) -> None:
+    def __init__(
+        self,
+        coordinator: TianYuanCoordinator,
+        entry: TianYuanConfigEntry,
+        description: TianYuanSelectDescription,
+    ) -> None:
         super().__init__(coordinator)
         self.entity_description = description
         self._attr_unique_id = f"{entry.entry_id}_{description.key}"
@@ -165,49 +184,56 @@ class TianYuanQihuangSelect(TianYuanQihuangBaseEntity, SelectEntity):
     def options(self) -> list[str]:
         """动态返回级联后的选项列表。"""
         dtype = self.entity_description.data_type
-        
+
         # 性别选项是固定的
         if dtype == SELECT_TYPE_GENDER:
             return ["male", "female"]
-            
+
         if dtype == "fuxingjue_viscera":
             return 辅行诀脏腑用药法要类.获取所有大类法()
         if dtype == "symptom":
             return 辅行诀脏腑用药法要类.获取大类症状法(self.coordinator.辅行诀选中大类)
-            
+
         if dtype == "shanghan_channel":
             return 伤寒杂病论类.获取所有六经法()
         if dtype == "shanghan_syndrome":
             return 伤寒杂病论类.获取经下所有证型法(self.coordinator.伤寒选中六经)
         if dtype == "shanghan_formula":
             return 伤寒杂病论类.获取证型下所有方名法(self.coordinator.伤寒选中证型)
-            
+
         return []
 
     @property
     def current_option(self) -> str | None:
         """从协调器读取当前状态，并增加安全过滤。"""
         dtype = self.entity_description.data_type
-        
-        if dtype == SELECT_TYPE_GENDER: val = GENDER_INTERNAL_TO_OPTION.get(self.coordinator.性别)
-        elif dtype == "fuxingjue_viscera": val = self.coordinator.辅行诀选中大类
-        elif dtype == "symptom": val = self.coordinator.辅行诀选中症状
-        elif dtype == "shanghan_channel": val = self.coordinator.伤寒选中六经
-        elif dtype == "shanghan_syndrome": val = self.coordinator.伤寒选中证型
-        elif dtype == "shanghan_formula": val = self.coordinator.伤寒选中方名
-        else: return None
+
+        if dtype == SELECT_TYPE_GENDER:
+            val = GENDER_INTERNAL_TO_OPTION.get(self.coordinator.性别)
+        elif dtype == "fuxingjue_viscera":
+            val = self.coordinator.辅行诀选中大类
+        elif dtype == "symptom":
+            val = self.coordinator.辅行诀选中症状
+        elif dtype == "shanghan_channel":
+            val = self.coordinator.伤寒选中六经
+        elif dtype == "shanghan_syndrome":
+            val = self.coordinator.伤寒选中证型
+        elif dtype == "shanghan_formula":
+            val = self.coordinator.伤寒选中方名
+        else:
+            return None
 
         # 防御逻辑
         current_options = self.options
         if val not in current_options:
             return current_options[0] if current_options else None
-        
+
         return val
 
     async def async_select_option(self, option: str) -> None:
         """分发写入逻辑。"""
         dtype = self.entity_description.data_type
-        
+
         if dtype == SELECT_TYPE_GENDER:
             self.coordinator.性别 = GENDER_OPTION_TO_INTERNAL.get(option, "男")
             await self.coordinator.async_refresh()

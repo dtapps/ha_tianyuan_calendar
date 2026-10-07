@@ -1,4 +1,5 @@
 """TianYuan Calendar 配置流测试。"""
+
 from __future__ import annotations
 
 from homeassistant import config_entries, data_entry_flow
@@ -86,7 +87,11 @@ async def test_user_flow_allows_multiple_instances(hass: HomeAssistant) -> None:
     )
     c1 = await hass.config_entries.flow.async_configure(
         r1["flow_id"],
-        {CONF_CUSTOM_LATITUDE: 39.9, CONF_CUSTOM_LONGITUDE: 116.4, CONF_REFRESH_INTERVAL: 1},
+        {
+            CONF_CUSTOM_LATITUDE: 39.9,
+            CONF_CUSTOM_LONGITUDE: 116.4,
+            CONF_REFRESH_INTERVAL: 1,
+        },
     )
     assert c1["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
     assert c1["title"] == "天元 (39.90°N, 116.40°E)"
@@ -97,7 +102,11 @@ async def test_user_flow_allows_multiple_instances(hass: HomeAssistant) -> None:
     )
     c2 = await hass.config_entries.flow.async_configure(
         r2["flow_id"],
-        {CONF_CUSTOM_LATITUDE: 22.5, CONF_CUSTOM_LONGITUDE: 114.1, CONF_REFRESH_INTERVAL: 5},
+        {
+            CONF_CUSTOM_LATITUDE: 22.5,
+            CONF_CUSTOM_LONGITUDE: 114.1,
+            CONF_REFRESH_INTERVAL: 5,
+        },
     )
     assert c2["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
     assert c2["title"] == "天元 (22.50°N, 114.10°E)"

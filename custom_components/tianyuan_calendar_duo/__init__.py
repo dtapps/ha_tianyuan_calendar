@@ -1,4 +1,5 @@
 """TianYuan 集成入口"""
+
 from __future__ import annotations
 
 import os
@@ -28,6 +29,7 @@ from .tianyuan.library import 检查专业权限类
 # 定义配置条目类型
 type TianYuanConfigEntry = ConfigEntry[TianYuanCoordinator]
 
+
 async def async_setup_entry(hass: HomeAssistant, entry: TianYuanConfigEntry) -> bool:
     """设置 TianYuan 集成实例."""
 
@@ -41,9 +43,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: TianYuanConfigEntry) -> 
             local_path = hass.config.path("custom_components", DOMAIN, "www")
             path_exists = await hass.async_add_executor_job(os.path.exists, local_path)
             if path_exists:
-                await hass.http.async_register_static_paths([
-                    StaticPathConfig(f"/{DOMAIN}-local", local_path, False)
-                ])
+                await hass.http.async_register_static_paths(
+                    [StaticPathConfig(f"/{DOMAIN}-local", local_path, False)]
+                )
                 # 注册资源 URL 携带集成版本号：升版后 URL 随之变化，自然绕开浏览器旧缓存
                 card_url = f"/{DOMAIN}-local/tianyuan-lunar-card.js?v={version}"
                 frontend.add_extra_js_url(hass, card_url)
@@ -62,7 +64,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: TianYuanConfigEntry) -> 
     # 定义各设备的标识符 (Identifiers)
     main_device_ident = (DOMAIN, entry.entry_id)
     shushu_device_ident = (DOMAIN, f"{entry.entry_id}_shushu")
-    qihuang_device_ident = (DOMAIN, f"{entry.entry_id}_qihuang") # 新增：岐黄设备ID
+    qihuang_device_ident = (DOMAIN, f"{entry.entry_id}_qihuang")  # 新增：岐黄设备ID
     # 显式注册主设备，确保子设备通过 via_device 关联时主设备已存在且名称可本地化
     device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,
@@ -118,7 +120,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: TianYuanConfigEntry) -> 
 
     return True
 
-def _cleanup_private_entities(hass: HomeAssistant, entry: TianYuanConfigEntry, has_pro_access: bool) -> None:
+
+def _cleanup_private_entities(
+    hass: HomeAssistant, entry: TianYuanConfigEntry, has_pro_access: bool
+) -> None:
     """清除不再符合条件的自用实体，避免僵尸实体残留。"""
     reg = er.async_get(hass)
     conf = {**entry.data, **entry.options}
@@ -128,7 +133,7 @@ def _cleanup_private_entities(hass: HomeAssistant, entry: TianYuanConfigEntry, h
         uid = entity.unique_id
         if not uid or not uid.startswith(f"{entry.entry_id}_"):
             continue
-        key = uid[len(entry.entry_id) + 1:]
+        key = uid[len(entry.entry_id) + 1 :]
         try:
             if key in QIHUANG_PRIVATE_KEYS and not qihuang_available:
                 reg.async_remove(entity.entity_id)
@@ -139,10 +144,12 @@ def _cleanup_private_entities(hass: HomeAssistant, entry: TianYuanConfigEntry, h
         except Exception as err:  # 实体已被其它路径（如子设备删除）移除时静默跳过
             LOGGER.debug("清理自用实体 %s 时忽略: %s", entity.entity_id, err)
 
+
 async def async_update_options(hass: HomeAssistant, entry: TianYuanConfigEntry) -> None:
     """当用户在集成选项中点击保存时触发。"""
     LOGGER.debug("检测到配置选项更新，正在重新加载集成...")
     await hass.config_entries.async_reload(entry.entry_id)
+
 
 async def async_unload_entry(hass: HomeAssistant, entry: TianYuanConfigEntry) -> bool:
     """卸载集成实例."""

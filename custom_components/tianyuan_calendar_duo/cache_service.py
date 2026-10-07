@@ -7,6 +7,7 @@ from collections import OrderedDict
 from typing import Any, Callable, Awaitable
 from .const import LOGGER
 
+
 class CacheService:
     def __init__(self, capacity: int = 500):
         self.capacity = capacity
@@ -25,7 +26,7 @@ class CacheService:
         keys_to_del = [k for k, v in self._cache.items() if now > v[1]]
         for k in keys_to_del:
             del self._cache[k]
-        
+
         # 如果依然超量，执行 LRU 淘汰
         while len(self._cache) > self.capacity:
             self._cache.popitem(last=False)
@@ -35,7 +36,7 @@ class CacheService:
         key: str,
         builder: Callable[[], Any | Awaitable[Any]],
         ttl: int = 86400,
-        cache_none: bool = True  # 是否允许缓存 None
+        cache_none: bool = True,  # 是否允许缓存 None
     ) -> Any:
         # 尝试从缓存中提取 (无锁快速路径)
         if key in self._cache:
@@ -49,7 +50,7 @@ class CacheService:
         # 细粒度锁管理（获取或创建锁）
         if key not in self._locks:
             self._locks[key] = asyncio.Lock()
-        
+
         async with self._locks[key]:
             try:
                 # Double Check (二次检查)
@@ -75,10 +76,10 @@ class CacheService:
                 expire_at = time.time() + ttl
                 self._cache[key] = (result, expire_at)
                 self._cache.move_to_end(key)
-                
+
                 # 清理多余内存
                 self._evict_logic()
-                
+
                 return result
             finally:
                 # 锁清理：由于此 key 已处理完毕，删除锁对象释放内存
