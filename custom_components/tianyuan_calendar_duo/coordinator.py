@@ -1,4 +1,5 @@
-"""TianYuan 核心协调器 """
+"""TianYuan 核心协调器"""
+
 # 干支纪日：晚子时日柱算当天
 # 干支纪年：新年以立春节气交接的时刻起算
 from __future__ import annotations
@@ -13,6 +14,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 from homeassistant.components.calendar import CalendarEvent
+
 # 农历库
 from lunar_python import Lunar, Solar
 
@@ -49,6 +51,7 @@ from .const import (
     MODE_TST,
 )
 
+
 class TianYuanData(TypedDict):
     """天元协调器数据结构"""
 
@@ -83,6 +86,7 @@ class TianYuanData(TypedDict):
     易经名称数据: str
     易经信息数据: dict[str, Any]
 
+
 class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
     """天元核心计算协调器"""
 
@@ -96,7 +100,7 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
         self.性别: str = "男"
         self.选中卦名: str | None = None
         self.六爻输入字符串 = "阳阳阳阴阴阴"
-        
+
         # --- 辅行诀联动状态 ---
         self.辅行诀选中大类 = "肝"
         self.辅行诀选中症状 = "胁下痛"
@@ -125,7 +129,11 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
         经度偏移分钟 = (经度 - 120) * 4
         年内序号 = dt.timetuple().tm_yday
         年内角度项 = 2 * math.pi * (年内序号 - 81) / 365
-        时间方程 = 9.87 * math.sin(2 * 年内角度项) - 7.53 * math.cos(年内角度项) - 1.5 * math.sin(年内角度项)
+        时间方程 = (
+            9.87 * math.sin(2 * 年内角度项)
+            - 7.53 * math.cos(年内角度项)
+            - 1.5 * math.sin(年内角度项)
+        )
 
         return dt + timedelta(minutes=经度偏移分钟 + 时间方程)
 
@@ -135,7 +143,13 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
         try:
             当前时间 = dt_util.now()
             实时模式 = self.查看日期 is None
-            基准时间 = 当前时间 if 实时模式 else datetime.combine(self.查看日期, 当前时间.time()).replace(tzinfo=当前时间.tzinfo)
+            基准时间 = (
+                当前时间
+                if 实时模式
+                else datetime.combine(self.查看日期, 当前时间.time()).replace(
+                    tzinfo=当前时间.tzinfo
+                )
+            )
 
             模式 = self.entry.options.get(CONF_CALC_MODE, MODE_ST)
             经度 = float(self.entry.options.get(CONF_CUSTOM_LONGITUDE, 120.0))
@@ -149,15 +163,17 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
             标准农历 = Lunar.fromDate(基准时间)
             真太阳时 = self._计算真太阳时类(基准时间, 经度)
             真太阳时农历 = Lunar.fromDate(真太阳时)
-            tst_date_str = 真太阳时.strftime('%Y-%m-%d')
+            tst_date_str = 真太阳时.strftime("%Y-%m-%d")
             时辰名 = 真太阳时农历.getTimeZhi()
 
             # 获取日级缓存（key 含经纬度：改坐标后无需依赖整集成 reload 来清空缓存）
             day_key = f"D_{tst_date_str}_{纬度}_{经度}_{模式}"
             日级数据 = await self._cache.get_or_set(
                 day_key,
-                lambda: self.hass.async_add_executor_job(self._获取同步日级基础数据类, 真太阳时, 基准时间, 模式),
-                ttl=86400
+                lambda: self.hass.async_add_executor_job(
+                    self._获取同步日级基础数据类, 真太阳时, 基准时间, 模式
+                ),
+                ttl=86400,
             )
             数据: TianYuanData = 日级数据.copy()
 
@@ -166,24 +182,47 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
                 hour_key = f"H_{tst_date_str}_{时辰名}_{self.性别}_{模式}"
                 时级数据 = await self._cache.get_or_set(
                     hour_key,
-                    lambda: self.hass.async_add_executor_job(self._获取同步时级动态数据类, 真太阳时, 模式),
-                    ttl=7200
+                    lambda: self.hass.async_add_executor_job(
+                        self._获取同步时级动态数据类, 真太阳时, 模式
+                    ),
+                    ttl=7200,
                 )
                 if 时级数据:
                     # 根据开关合并数据
                     if 开启岐黄:
-                        数据.update({k: v for k, v in 时级数据.items() if k in [
-                            "纳甲筮法数据", "纳子筮法数据", "灵龟八法数据", "飞腾八法数据",
-                            "迎随补泻数据", "六步气机数据", "年度运气总览数据"
-                        ]})
+                        数据.update(
+                            {
+                                k: v
+                                for k, v in 时级数据.items()
+                                if k
+                                in [
+                                    "纳甲筮法数据",
+                                    "纳子筮法数据",
+                                    "灵龟八法数据",
+                                    "飞腾八法数据",
+                                    "迎随补泻数据",
+                                    "六步气机数据",
+                                    "年度运气总览数据",
+                                ]
+                            }
+                        )
                     if 开启术数:
-                        数据.update({k: v for k, v in 时级数据.items() if k in [
-                            "小六壬数据", "梅花易数数据", "皇极经世数据"
-                        ]})
+                        数据.update(
+                            {
+                                k: v
+                                for k, v in 时级数据.items()
+                                if k in ["小六壬数据", "梅花易数数据", "皇极经世数据"]
+                            }
+                        )
 
             # 实时计算与覆盖 (处理 UI 实时交互)：同步计算交给 executor，避免阻塞事件循环
             实时覆盖数据 = await self.hass.async_add_executor_job(
-                self._获取同步实时覆盖数据类, 真太阳时, 标准农历, 实时模式, 数据, self.选中卦名
+                self._获取同步实时覆盖数据类,
+                真太阳时,
+                标准农历,
+                实时模式,
+                数据,
+                self.选中卦名,
             )
             数据.update(实时覆盖数据)
 
@@ -193,16 +232,29 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
         except Exception as err:
             raise UpdateFailed(f"天元历法计算失败: {err}") from err
 
-    def _获取同步实时覆盖数据类(self, 真太阳时: datetime, 标准农历: Lunar, 实时模式: bool, 日级数据: dict, 选中卦名: str | None) -> dict:
+    def _获取同步实时覆盖数据类(
+        self,
+        真太阳时: datetime,
+        标准农历: Lunar,
+        实时模式: bool,
+        日级数据: dict,
+        选中卦名: str | None,
+    ) -> dict:
         """实时覆盖数据计算（同步，运行于 executor 线程）"""
         真太阳时农历 = Lunar.fromDate(真太阳时)
         # 按计算模式选择主农历，确保四柱八字（含时柱）与日级基础数据口径一致
         模式 = self.entry.options.get(CONF_CALC_MODE, MODE_ST)
         主农历 = 真太阳时农历 if 模式 == MODE_TST else 标准农历
-        更多实体包 = 天元农历逻辑类.获取更多实体类(真太阳时农历, 真太阳时, self.性别, self.纬度, self.经度)
+        更多实体包 = 天元农历逻辑类.获取更多实体类(
+            真太阳时农历, 真太阳时, self.性别, self.纬度, self.经度
+        )
         # 将当前实例配置的经纬度写入真太阳时属性，便于前端核对定位
-        更多实体包["真太阳时数据"]["attributes"]["longitude"] = getattr(self, "经度", 120.0)
-        更多实体包["真太阳时数据"]["attributes"]["latitude"] = getattr(self, "纬度", 39.9)
+        更多实体包["真太阳时数据"]["attributes"]["longitude"] = getattr(
+            self, "经度", 120.0
+        )
+        更多实体包["真太阳时数据"]["attributes"]["latitude"] = getattr(
+            self, "纬度", 39.9
+        )
         # 四柱八字/天干地支含时柱或时辰纳音，必须随时辰刷新：从实时主农历重算，覆盖日级缓存的冻结值
         主更多实体包 = 天元农历逻辑类.获取更多实体类(主农历, 真太阳时, self.性别)
         四柱八字包 = 主更多实体包["四柱八字数据"]
@@ -222,21 +274,27 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
             "天干地支数据": 天干地支包,
             "易经名称数据": 显示卦名,
             "易经信息数据": 易经详注类.获取详注包装类(显示卦名),
-            "六爻爻法数据": 六爻占卜类.执行占卜流程类(self.六爻输入字符串, 日级数据["农历"]),
+            "六爻爻法数据": 六爻占卜类.执行占卜流程类(
+                self.六爻输入字符串, 日级数据["农历"]
+            ),
             "辅行诀结果数据": 辅行诀脏腑用药法要类.辅行诀选方类(self.辅行诀选中症状),
             "伤寒结果数据": 伤寒杂病论类.获取方剂数据类(self.伤寒选中方名),
         }
 
     # 静态构建器：增加 模式(mode) 参数支持
-    def _获取同步日级基础数据类(self, 真太阳时: datetime, 基准时间: datetime, 模式: str) -> dict:
+    def _获取同步日级基础数据类(
+        self, 真太阳时: datetime, 基准时间: datetime, 模式: str
+    ) -> dict:
         """日级构建器：严格遵循模式选择"""
-        
+
         标准农历 = Lunar.fromDate(基准时间)
         真太阳时农历 = Lunar.fromDate(真太阳时)
         真太阳时阳历 = Solar.fromDate(真太阳时)
         # 模式判定：决定传感器主实体显示的“宇宙”
         主农历 = 真太阳时农历 if 模式 == MODE_TST else 标准农历
-        更多实体 = 天元农历逻辑类.获取更多实体类(主农历,真太阳时,self.性别, self.纬度, self.经度)
+        更多实体 = 天元农历逻辑类.获取更多实体类(
+            主农历, 真太阳时, self.性别, self.纬度, self.经度
+        )
 
         return {
             "农历": 主农历,
@@ -258,7 +316,7 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
         真太阳时农历 = Lunar.fromDate(真太阳时)
         真太阳时阳历 = Solar.fromDate(真太阳时)
         运气结果 = 五运六气类.全量计算类(真太阳时农历)
-        
+
         return {
             "纳甲筮法数据": 子午流注类.纳甲法类(真太阳时农历),
             "纳子筮法数据": 子午流注类.纳子法类(真太阳时),
@@ -318,67 +376,80 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
         """透传给逻辑引擎，包装今日历书简报"""
         return 天元日历逻辑类.包装单日摘要事件法(单日缓存数据, 目标日期)
 
-    def _构建单生日日历事件数据类(self, 单日数据包: dict, 目标日期: date) -> dict | None:
+    def _构建单生日日历事件数据类(
+        self, 单日数据包: dict, 目标日期: date
+    ) -> dict | None:
         """透传给逻辑引擎，包装今日生日简报"""
         return 天元日历逻辑类.包装单日生日摘要类(
-            目标日期, 
-            单日数据包.get("农历"), # 已对齐键名
-            单日数据包.get("阳历"), # 已对齐键名
-            self.entry.options.get(CONF_BIRTHDAYS, [])
+            目标日期,
+            单日数据包.get("农历"),  # 已对齐键名
+            单日数据包.get("阳历"),  # 已对齐键名
+            self.entry.options.get(CONF_BIRTHDAYS, []),
         )
 
-    async def 获取日历事件范围数据类(self, 开始日期: date, 结束日期: date) -> list[CalendarEvent]:
+    async def 获取日历事件范围数据类(
+        self, 开始日期: date, 结束日期: date
+    ) -> list[CalendarEvent]:
         """批量获取并拆分多行历书事件"""
         模式 = self.entry.options.get(CONF_CALC_MODE, MODE_ST)
         采样点 = dt_time(12, 0)
         结果 = []
-        
+
         当前日期 = 开始日期
         while 当前日期 < 结束日期:
             键 = f"D_{当前日期.strftime('%Y-%m-%d')}_{模式}"
-            采样时间 = datetime.combine(当前日期, 采样点).replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
-            
+            采样时间 = datetime.combine(当前日期, 采样点).replace(
+                tzinfo=dt_util.DEFAULT_TIME_ZONE
+            )
+
             # 从缓存获取（或计算）单日基础数据
             日数据 = await self._cache.get_or_set(
                 键,
-                lambda: self.hass.async_add_executor_job(self._获取同步日级基础数据类, 采样时间, 采样时间, 模式),
-                ttl=86400
+                lambda: self.hass.async_add_executor_job(
+                    self._获取同步日级基础数据类, 采样时间, 采样时间, 模式
+                ),
+                ttl=86400,
             )
-            
+
             if 日数据 and "全量属性数据" in 日数据:
                 # 调用逻辑引擎拆分为多行
                 结果.extend(天元日历逻辑类.包装多行历书事件法(当前日期, 日数据))
-                
+
             当前日期 += timedelta(days=1)
         return 结果
 
-    async def 获取生日日历事件范围类(self, 开始日期: date, 结束日期: date) -> list[CalendarEvent]:
+    async def 获取生日日历事件范围类(
+        self, 开始日期: date, 结束日期: date
+    ) -> list[CalendarEvent]:
         """批量获取生日事件"""
         模式 = self.entry.options.get(CONF_CALC_MODE, MODE_ST)
         生日配置 = self.entry.options.get(CONF_BIRTHDAYS, [])
         采样点 = dt_time(12, 0)
         结果 = []
-        
+
         当前日期 = 开始日期
         while 当前日期 < 结束日期:
             键 = f"D_{当前日期.strftime('%Y-%m-%d')}_{模式}"
-            采样时间 = datetime.combine(当前日期, 采样点).replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
-            
+            采样时间 = datetime.combine(当前日期, 采样点).replace(
+                tzinfo=dt_util.DEFAULT_TIME_ZONE
+            )
+
             日数据 = await self._cache.get_or_set(
                 键,
-                lambda: self.hass.async_add_executor_job(self._获取同步日级基础数据类, 采样时间, 采样时间, 模式),
-                ttl=86400
+                lambda: self.hass.async_add_executor_job(
+                    self._获取同步日级基础数据类, 采样时间, 采样时间, 模式
+                ),
+                ttl=86400,
             )
-            
+
             if 日数据:
                 # 调用逻辑引擎检测生日，并传入对齐的对象键名
-                结果.extend(天元日历逻辑类.检测并包装生日事件集类(
-                    当前日期, 
-                    日数据.get("农历"),
-                    日数据.get("阳历"),
-                    生日配置
-                ))
-                
+                结果.extend(
+                    天元日历逻辑类.检测并包装生日事件集类(
+                        当前日期, 日数据.get("农历"), 日数据.get("阳历"), 生日配置
+                    )
+                )
+
             当前日期 += timedelta(days=1)
         return 结果
 
@@ -405,7 +476,7 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
             entry_type="service",
             via_device=(DOMAIN, self.entry.entry_id),
             model="法于阴阳，和于术数，以通天人之纪。",
-        )   
+        )
 
     @property
     def shushu_device_info(self):

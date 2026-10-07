@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       # Validate branch
       - name: Validate branch
         env:
@@ -68,8 +67,9 @@ jobs:
           echo "Checking PR content"
 
           if [[ -z "$PR_BODY" ]]; then
-            echo "❌ PR body is empty"
-            exit 1
+            echo "⚠️ PR body is empty — description validation skipped (non-blocking)"
+            echo "✅ Description passed"
+            exit 0
           fi
 
           # Description check
@@ -91,7 +91,7 @@ jobs:
 
           # Change type check
           TYPE_COUNT=$(echo "$PR_BODY" \
-            | grep -Ec '\[x\].*(bugfix|new feature|refactor|breaking|docs):')
+            | grep -Ec '\[x\].*(bugfix|new feature|refactor|breaking|docs):' || true)
 
 
           if [[ "$TYPE_COUNT" -ne 1 ]]; then

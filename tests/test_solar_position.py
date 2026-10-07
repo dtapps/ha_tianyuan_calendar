@@ -2,6 +2,7 @@
 
 覆盖：赤纬近似下的高度角/方位角、日出日落换算、夜间负值、极昼极夜边界。
 """
+
 from __future__ import annotations
 
 import importlib.util
@@ -14,10 +15,17 @@ import pytest
 # 但 custom_components 父包的 __init__ 会导入 homeassistant，导致无 HA 环境无法收集测试。
 # 故直接按文件路径加载本模块，做独立单元测试（与运行/集成环境解耦）。
 _路径 = os.path.join(
-    os.path.dirname(__file__), "..",
-    "custom_components", "tianyuan_calendar_duo", "tianyuan", "lifa", "lunar_logic.py",
+    os.path.dirname(__file__),
+    "..",
+    "custom_components",
+    "tianyuan_calendar_duo",
+    "tianyuan",
+    "lifa",
+    "lunar_logic.py",
 )
-_spec = importlib.util.spec_from_file_location("lunar_logic_standalone", os.path.abspath(_路径))
+_spec = importlib.util.spec_from_file_location(
+    "lunar_logic_standalone", os.path.abspath(_路径)
+)
 _模块 = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_模块)
 天元农历逻辑类 = _模块.天元农历逻辑类

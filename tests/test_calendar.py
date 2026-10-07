@@ -15,7 +15,9 @@ from .helpers import make_coordinator, make_entry
 
 
 def _cdesc(key: str, cal_type: str) -> TianYuanCalendarEntityDescription:
-    return TianYuanCalendarEntityDescription(key=key, translation_key=key, cal_type=cal_type)
+    return TianYuanCalendarEntityDescription(
+        key=key, translation_key=key, cal_type=cal_type
+    )
 
 
 def test_almanac_event_dispatches() -> None:
@@ -45,7 +47,9 @@ def test_birthday_event_dispatches() -> None:
         "start": date(2026, 8, 16),
         "end": date(2026, 8, 16),
     }
-    e = TianYuanCalendarEntity(co, make_entry(), _cdesc("birthday_reminder", "birthday"))
+    e = TianYuanCalendarEntity(
+        co, make_entry(), _cdesc("birthday_reminder", "birthday")
+    )
     ev = e.event
     assert isinstance(ev, CalendarEvent)
     assert ev.summary == "张三生日"
@@ -63,6 +67,8 @@ async def test_async_get_events_routes_almanac() -> None:
 async def test_async_get_events_routes_birthday() -> None:
     co = make_coordinator()
     co.获取生日日历事件范围类 = AsyncMock(return_value=[])
-    e = TianYuanCalendarEntity(co, make_entry(), _cdesc("birthday_reminder", "birthday"))
+    e = TianYuanCalendarEntity(
+        co, make_entry(), _cdesc("birthday_reminder", "birthday")
+    )
     await e.async_get_events(None, datetime(2026, 8, 1), datetime(2026, 8, 31))
     co.获取生日日历事件范围类.assert_awaited()
