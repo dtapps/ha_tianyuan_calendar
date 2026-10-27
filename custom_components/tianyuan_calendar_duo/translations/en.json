@@ -1,49 +1,14 @@
 {
-  "title": "TianYuan Calendar",
   "config": {
     "step": {
       "user": {
-        "title": "TianYuan Lunar Calendar",
-        "description": "Please enter the basic configuration to begin.",
         "data": {
+          "custom_latitude": "Geographic Latitude",
           "custom_longitude": "Geographic Longitude",
-          "custom_latitude": "Geographic Latitude",
           "refresh_interval": "Refresh Interval (minutes)"
-        }
-      }
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "title": "TianYuan Lunar Calendar Advanced Settings",
-        "data": {
-          "custom_longitude": "Geographic Longitude (for True Solar Time calibration)",
-          "custom_latitude": "Geographic Latitude",
-          "refresh_interval": "Refresh Interval (minutes)",
-          "calc_mode": "Calculation Mode",
-          "enable_more": "Enable Additional Advanced Entities",
-          "enable_card": "Enable Frontend Card Resource",
-          "enable_qihuang": "Enable TianYuan Qihuang",
-          "enable_shushu": "Enable TianYuan Divination",
-          "manage_birthdays": "Manage Birthdays List",
-          "system_token": "System Token"
-        }
-      },
-      "birthdays": {
-        "title": "Birthday Management",
-        "description": "### Please enter birthday information, format: Name Date of Birth [Lunar]\n Zhang San 1994-04-26\n Li Si 1995-05-20 Lunar",
-        "data": {
-          "birthdays": "Birthdays List"
-        }
-      }
-    }
-  },
-  "selector": {
-    "calc_mode": {
-      "options": {
-        "standard": "Compatibility Mode (general info follows system time)",
-        "pro": "Professional Mode (all data based on True Solar Time)"
+        },
+        "description": "Please enter the basic configuration to begin.",
+        "title": "TianYuan Lunar Calendar"
       }
     }
   },
@@ -59,110 +24,33 @@
     }
   },
   "entity": {
-    "sensor": {
-      "main_lunar": {
-        "name": "Lunar Calendar"
-      },
-      "holiday": {
-        "name": "Holiday"
-      },
-      "solar_term": {
-        "name": "Solar Term"
-      },
-      "shier_shichen": {
-        "name": "Shi Er Shi Chen"
-      },
-      "tst_time": {
-        "name": "True Solar Time",
-        "state_attributes": {
-          "solar_time": { "name": "Solar Time" },
-          "longitude": { "name": "Longitude" },
-          "latitude": { "name": "Latitude" },
-          "solar_altitude": { "name": "Solar Altitude" },
-          "solar_azimuth": { "name": "Solar Azimuth" },
-          "solar_declination": { "name": "Solar Declination" },
-          "sunrise": { "name": "Sunrise" },
-          "sunset": { "name": "Sunset" },
-          "daylight_duration": { "name": "Daylight Duration" }
-        }
-      },
-      "sizhu_bazi": {
-        "name": "Four Pillars of Destiny"
-      },
-      "tiangan_dizhi": {
-        "name": "Heavenly Stems & Earthly Branches"
-      },
-      "shier_tianshen": {
-        "name": "Shi Er Tian Shen"
-      },
-      "chong_sha": {
-        "name": "Chong Sha"
-      },
-      "dongfang_xingxiu": {
-        "name": "Dong Fang Xing Xiu"
-      },
-      "linggui_bafa": {
-        "name": "Ling Gui Ba Fa"
-      },
-      "najia_shifa": {
-        "name": "Na Jia Shi Fa"
-      },
-      "nazi_shifa": {
-        "name": "Na Zi Shi Fa"
-      },
-      "feiteng_bafa": {
-        "name": "Fei Teng Ba Fa"
-      },
-      "yingsui_buxie": {
-        "name": "Ying Sui Bu Xie"
-      },
-      "liubu_qiji": {
-        "name": "Liu Bu Qi Ji"
-      },
-      "niandu_yunqi_zonglan": {
-        "name": "Nian Du Wu Yun Liu Qi Zong Lan"
-      },
-      "xiao_liuren": {
-        "name": "Xiao Liu Ren Shi Gua"
-      },
-      "huangji_jingshi": {
-        "name": "Huang Ji Jing Shi Zhi Yue Gua"
-      },
-      "meihua_yishu": {
-        "name": "Mei Hua Yi Shu Shi Gua"
-      },
-      "iching_reader": {
-        "name": "I Ching Hexagram"
-      },
-      "liuyao_shifa": {
-        "name": "Liu Yao Shi Fa Zhan Bu"
-      },
-      "fuxingjue_zangfu_yongyaofa": {
-        "name": "Fuxing Jue Zang Fu Yong Yao Fa"
-      },
-      "shanghan_zabinglun": {
-        "name": "Shang Han Za bing Lun"
-      }
-    },
-    "calendar": {
-      "lunar_almanac": {
-        "name": "TianYuan Calendar"
-      },
-      "birthday_reminder": {
-        "name": "Birthday Reminder"
-      }
-    },
     "button": {
       "reset_to_today": {
         "name": "Return to Today"
       }
     },
+    "calendar": {
+      "birthday_reminder": {
+        "name": "Birthday Reminder"
+      },
+      "lunar_almanac": {
+        "name": "TianYuan Calendar"
+      }
+    },
+    "date": {
+      "date_navigator": {
+        "name": "Base Date Switch"
+      }
+    },
     "select": {
+      "fuxingjue_viscera": {
+        "name": "Fuxing Jue Viscera Selection"
+      },
       "gender": {
         "name": "ZiWu Flow Gender Selection",
         "state": {
-          "male": "Male",
-          "female": "Female"
+          "female": "Female",
+          "male": "Male"
         }
       },
       "iching_selector": {
@@ -171,25 +59,120 @@
           "real_time_follow": "Real-time Follow"
         }
       },
-      "fuxingjue_viscera": {
-        "name": "Fuxing Jue Viscera Selection"
-      },
-      "symptom_selector": {
-        "name": "Symptom Selector"
-      },
       "shanghan_channel": {
         "name": "Shang Han Channel"
+      },
+      "shanghan_formula_selector": {
+        "name": "Shang Han Formula Selection"
       },
       "shanghan_syndrome_selector": {
         "name": "Shang Han Syndrome Selection"
       },
-      "shanghan_formula_selector": {
-        "name": "Shang Han Formula Selection"
+      "symptom_selector": {
+        "name": "Symptom Selector"
       }
     },
-    "date": {
-      "date_navigator": {
-        "name": "Base Date Switch"
+    "sensor": {
+      "chong_sha": {
+        "name": "Chong Sha"
+      },
+      "dongfang_xingxiu": {
+        "name": "Dong Fang Xing Xiu"
+      },
+      "feiteng_bafa": {
+        "name": "Fei Teng Ba Fa"
+      },
+      "fuxingjue_zangfu_yongyaofa": {
+        "name": "Fuxing Jue Zang Fu Yong Yao Fa"
+      },
+      "holiday": {
+        "name": "Holiday"
+      },
+      "huangji_jingshi": {
+        "name": "Huang Ji Jing Shi Zhi Yue Gua"
+      },
+      "iching_reader": {
+        "name": "I Ching Hexagram"
+      },
+      "linggui_bafa": {
+        "name": "Ling Gui Ba Fa"
+      },
+      "liubu_qiji": {
+        "name": "Liu Bu Qi Ji"
+      },
+      "liuyao_shifa": {
+        "name": "Liu Yao Shi Fa Zhan Bu"
+      },
+      "main_lunar": {
+        "name": "Lunar Calendar"
+      },
+      "meihua_yishu": {
+        "name": "Mei Hua Yi Shu Shi Gua"
+      },
+      "najia_shifa": {
+        "name": "Na Jia Shi Fa"
+      },
+      "nazi_shifa": {
+        "name": "Na Zi Shi Fa"
+      },
+      "niandu_yunqi_zonglan": {
+        "name": "Nian Du Wu Yun Liu Qi Zong Lan"
+      },
+      "shanghan_zabinglun": {
+        "name": "Shang Han Za bing Lun"
+      },
+      "shier_shichen": {
+        "name": "Shi Er Shi Chen"
+      },
+      "shier_tianshen": {
+        "name": "Shi Er Tian Shen"
+      },
+      "sizhu_bazi": {
+        "name": "Four Pillars of Destiny"
+      },
+      "solar_term": {
+        "name": "Solar Term"
+      },
+      "tiangan_dizhi": {
+        "name": "Heavenly Stems & Earthly Branches"
+      },
+      "tst_time": {
+        "name": "True Solar Time",
+        "state_attributes": {
+          "daylight_duration": {
+            "name": "Daylight Duration"
+          },
+          "latitude": {
+            "name": "Latitude"
+          },
+          "longitude": {
+            "name": "Longitude"
+          },
+          "solar_altitude": {
+            "name": "Solar Altitude"
+          },
+          "solar_azimuth": {
+            "name": "Solar Azimuth"
+          },
+          "solar_declination": {
+            "name": "Solar Declination"
+          },
+          "solar_time": {
+            "name": "Solar Time"
+          },
+          "sunrise": {
+            "name": "Sunrise"
+          },
+          "sunset": {
+            "name": "Sunset"
+          }
+        }
+      },
+      "xiao_liuren": {
+        "name": "Xiao Liu Ren Shi Gua"
+      },
+      "yingsui_buxie": {
+        "name": "Ying Sui Bu Xie"
       }
     },
     "text": {
@@ -197,5 +180,40 @@
         "name": "Liu Yao Zhan Bu Text Input"
       }
     }
-  }
+  },
+  "options": {
+    "step": {
+      "birthdays": {
+        "data": {
+          "birthdays": "Birthdays List"
+        },
+        "description": "### Please enter birthday information, format: Name Date of Birth [Lunar]\n Zhang San 1994-04-26\n Li Si 1995-05-20 Lunar",
+        "title": "Birthday Management"
+      },
+      "init": {
+        "data": {
+          "calc_mode": "Calculation Mode",
+          "custom_latitude": "Geographic Latitude",
+          "custom_longitude": "Geographic Longitude (for True Solar Time calibration)",
+          "enable_card": "Enable Frontend Card Resource",
+          "enable_more": "Enable Additional Advanced Entities",
+          "enable_qihuang": "Enable TianYuan Qihuang",
+          "enable_shushu": "Enable TianYuan Divination",
+          "manage_birthdays": "Manage Birthdays List",
+          "refresh_interval": "Refresh Interval (minutes)",
+          "system_token": "System Token"
+        },
+        "title": "TianYuan Lunar Calendar Advanced Settings"
+      }
+    }
+  },
+  "selector": {
+    "calc_mode": {
+      "options": {
+        "pro": "Professional Mode (all data based on True Solar Time)",
+        "standard": "Compatibility Mode (general info follows system time)"
+      }
+    }
+  },
+  "title": "TianYuan Calendar"
 }

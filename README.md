@@ -1,4 +1,4 @@
-# <img src="custom_components/tianyuan_calendar/brand/icon.png" width="64"> 🌙天元历法 (TianYuan Calendar)
+# <img src="custom_components/tianyuan_calendar_duo/brand/icon.png" width="64"> 🌙天元历法 (TianYuan Calendar)
 
 [![Release](https://img.shields.io/github/v/release/dtapps/ha_tianyuan_calendar)](https://github.com/dtapps/ha_tianyuan_calendar/releases) [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/dtapps/ha_tianyuan_calendar/blob/main/LICENSE) [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration) [![codecov](https://codecov.io/gh/dtapps/ha_tianyuan_calendar/branch/main/graph/badge.svg)](https://codecov.io/gh/dtapps/ha_tianyuan_calendar) [![Coveralls](https://coveralls.io/repos/github/dtapps/ha_tianyuan_calendar/badge.svg?branch=main)](https://coveralls.io/github/dtapps/ha_tianyuan_calendar?branch=main) ![](https://komarev.com/ghpvc/?username=dtapps&color=ff69b4)
 
