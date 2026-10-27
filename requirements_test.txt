@@ -9,4 +9,4 @@ pytest-cov
 lunar-python==1.4.8
 # 集成 manifest 依赖 frontend 组件，其启动需导入 hass_frontend 模块；
 # 该模块的 PyPI 发布包名为 home-assistant-frontend（非 hass_frontend），须与 homeassistant 2025.1.4 配套
-home-assistant-frontend==20250109.2
+home-assistant-frontend==20260930.5
