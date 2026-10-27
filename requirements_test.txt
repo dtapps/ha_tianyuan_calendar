@@ -1,0 +1,12 @@
+# 测试依赖（Home Assistant 自定义集成专用测试框架，会从 HA 中抽取测试插件）。
+# 安装命令：pip install -r requirements_test.txt
+#
+# pytest-homeassistant-custom-component 的版本需与集成目标 HA 版本匹配；
+# 如需可重现的 CI，建议钉死版本（例如 ==0.13.365，要求 Python >=3.14）。
+pytest-homeassistant-custom-component
+pytest-cov
+# 集成运行期依赖（manifest.json requirements），测试导入链会触发 lunar_python
+lunar-python==1.4.8
+# 集成 manifest 依赖 frontend 组件，其启动需导入 hass_frontend 模块；
+# 该模块的 PyPI 发布包名为 home-assistant-frontend（非 hass_frontend），须与 homeassistant 2025.1.4 配套
+home-assistant-frontend==20250109.2

@@ -1,7 +1,6 @@
 # 开发记录（DEV.md）
 
-> 本文件记录本分支相对原作者 `PraxiGEN/ha_tianyuan_calendar` 的本地改动与目的。
-> 面向开发者：说明「改了什么、为什么改、改动落在哪里」。
+> 本文件记录本分支相对原作者 `PraxiGEN/ha_tianyuan_calendar` 的本地改动与目的。 面向开发者：说明「改了什么、为什么改、改动落在哪里」。
 
 ---
 
@@ -44,8 +43,7 @@
 
 **背景**：初始实现的方位角公式为 `atan2(sinH, cosH·sinφ - tanδ·cosφ)`，正午（H=0、δ≈0）会算出 0°（北），但北半球正午太阳实际在南方（180°），方向错误。
 
-**改动** — `lunar_logic.py`：
-改用正确的地平坐标向量公式：
+**改动** — `lunar_logic.py`： 改用正确的地平坐标向量公式：
 
 ```
 北分量 = sinδ·cosφ - cosδ·sinφ·cosH
@@ -75,10 +73,7 @@
 
 **背景**：新增的太阳位置属性（及原有的太阳时/经纬度）在前端直接以中文 key 显示，英文环境无翻译。
 
-**改动** — `translations/en.json` 与 `translations/zh-Hans.json`：
-在 `entity.sensor.tst_time.state_attributes` 下补充翻译键：
-`太阳时 / 经度 / 纬度 / 太阳高度角 / 太阳方位角 / 太阳赤纬 / 日出 / 日落 / 白昼时长`
-→ 英文 `Solar Time / Longitude / Latitude / Solar Altitude / Solar Azimuth / Solar Declination / Sunrise / Sunset / Daylight Duration`。
+**改动** — `translations/en.json` 与 `translations/zh-Hans.json`： 在 `entity.sensor.tst_time.state_attributes` 下补充翻译键： `太阳时 / 经度 / 纬度 / 太阳高度角 / 太阳方位角 / 太阳赤纬 / 日出 / 日落 / 白昼时长` → 英文 `Solar Time / Longitude / Latitude / Solar Altitude / Solar Azimuth / Solar Declination / Sunrise / Sunset / Daylight Duration`。
 
 **说明**：HA 的 `state_attributes` 翻译要求翻译键与代码中 attributes dict 的 key 完全一致（本项目历史约定属性 key 为中文），因此翻译键为中文、翻译的是显示名 `name`。
 

@@ -24,6 +24,10 @@ push-force: ## 强制推送到所有远程仓库（忽略冲突）
 
 # ==================== 代码格式化 ====================
 
+# 一键格式化全部
+format: format-py format-web format-toml format-txt format-markdown
+	@echo "✅ 格式化完成"
+
 # Python 格式化（ruff 独立二进制，无需 venv/pip；已用官方脚本装到 ~/.local/bin）
 format-py:
 	"$$HOME/.local/bin/ruff" format .
@@ -40,6 +44,22 @@ format-toml:
 format-txt:
 	@find . -type f -name '*.txt' -not -path './.git/*' -not -path './.venv/*' -not -path './node_modules/*' -exec sh -c 'for f; do sed -i "" -e "s/[[:space:]]*$$//" "$$f"; last=$$(tail -c1 "$$f" | od -An -tx1 | tr -d " "); [ "$$last" = "0a" ] || printf "\n" >> "$$f"; done' _ {} +
 
-# 一键格式化全部
-format: format-py format-web format-toml format-txt
-	@echo "✅ 格式化完成"
+# 格式化 Markdown 文件
+.PHONY: format-markdown
+format-markdown:
+	@echo "[Format] 格式化文档 (Markdown)…"
+	@command -v markdownfmt >/dev/null 2>&1 || { \
+		echo "⚠️  markdownfmt 未安装，跳过 Markdown 格式化。" ; \
+		echo "   提示: 可通过运行 'go install github.com/Kunde21/markdownfmt/v3/cmd/markdownfmt@latest' 安装" ; \
+		exit 0 ; \
+	}
+	@echo "[Format] 使用 markdownfmt 格式化 Markdown..."
+	@for f in $(shell find . -type f -name '*.md' \
+		-not -path '*/.pytest_cache/*' \
+		-not -path './.ruff_cache/*' \
+		-not -path './.venv/*'); do \
+		[ -f "$$f" ] || continue; \
+		markdownfmt -w "$$f" || { echo "❌ markdownfmt 格式化失败: $$f"; exit 1; }; \
+	done
+	@echo "[Format] Markdown 格式化完成（markdownfmt）。"
+

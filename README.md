@@ -1,9 +1,6 @@
 # <img src="custom_components/tianyuan_calendar/brand/icon.png" width="64"> 🌙天元历法 (TianYuan Calendar)
 
-[![Release](https://img.shields.io/github/v/release/PraxiGEN/ha_tianyuan_calendar)](https://github.com/PraxiGEN/ha_tianyuan_calendar/releases)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/PraxiGEN/ha_tianyuan_calendar/blob/main/LICENSE)
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-![](https://komarev.com/ghpvc/?username=PraxiGEN&color=ff69b4)
+[![Release](https://img.shields.io/github/v/release/PraxiGEN/ha_tianyuan_calendar)](https://github.com/PraxiGEN/ha_tianyuan_calendar/releases) [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/PraxiGEN/ha_tianyuan_calendar/blob/main/LICENSE) [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration) ![](https://komarev.com/ghpvc/?username=PraxiGEN&color=ff69b4)
 
 ## 天元历法不再仅仅是历法传感器，它是一个深度整合中国传统“天文、术数、医学”的智能引擎。通过真太阳时修正，为用户提供精确的排盘、取穴与卦象预测。
 
@@ -117,5 +114,4 @@ https://github.com/PraxiGEN/ha_tianyuan_calendar
 
 - **为确保集成品牌图片正确显示，请选择 Home Assistant 2026.3+**
 
-  为确保品牌图标能够正确显示，建议使用 HA 2026.3 或更高版本。
-  从 2026.3 起，Home Assistant 引入了 custom_integrations 目录与 Brands Proxy API，自定义集成可以在自身目录中直接包含品牌图片。
+  为确保品牌图标能够正确显示，建议使用 HA 2026.3 或更高版本。 从 2026.3 起，Home Assistant 引入了 custom_integrations 目录与 Brands Proxy API，自定义集成可以在自身目录中直接包含品牌图片。
