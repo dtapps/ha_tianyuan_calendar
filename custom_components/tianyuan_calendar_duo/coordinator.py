@@ -462,7 +462,7 @@ class TianYuanCoordinator(DataUpdateCoordinator[TianYuanData]):
             manufacturer="TianYuan Calendar",
             sw_version=str(self.version),
             entry_type="service",
-            configuration_url="https://github.com/PraxiGEN/ha_tianyuan_calendar",
+            configuration_url="https://github.com/dtapps/ha_tianyuan_calendar",
             model="察日月之度，定岁时之序。",
         )
 
