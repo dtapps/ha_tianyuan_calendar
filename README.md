@@ -1,6 +1,6 @@
 # <img src="custom_components/tianyuan_calendar/brand/icon.png" width="64"> 🌙天元历法 (TianYuan Calendar)
 
-[![Release](https://img.shields.io/github/v/release/dtapps/ha_tianyuan_calendar)](https://github.com/dtapps/ha_tianyuan_calendar/releases) [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/dtapps/ha_tianyuan_calendar/blob/main/LICENSE) [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration) ![](https://komarev.com/ghpvc/?username=dtapps&color=ff69b4)
+[![Release](https://img.shields.io/github/v/release/dtapps/ha_tianyuan_calendar)](https://github.com/dtapps/ha_tianyuan_calendar/releases) [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/dtapps/ha_tianyuan_calendar/blob/main/LICENSE) [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration) [![codecov](https://codecov.io/gh/dtapps/ha_tianyuan_calendar/branch/main/graph/badge.svg)](https://codecov.io/gh/dtapps/ha_tianyuan_calendar) [![Coveralls](https://coveralls.io/repos/github/dtapps/ha_tianyuan_calendar/badge.svg?branch=main)](https://coveralls.io/github/dtapps/ha_tianyuan_calendar?branch=main) ![](https://komarev.com/ghpvc/?username=dtapps&color=ff69b4)
 
 ## 天元历法不再仅仅是历法传感器，它是一个深度整合中国传统“天文、术数、医学”的智能引擎。通过真太阳时修正，为用户提供精确的排盘、取穴与卦象预测。
 

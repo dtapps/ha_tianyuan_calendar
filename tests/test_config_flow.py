@@ -16,6 +16,8 @@ from custom_components.tianyuan_calendar_duo.const import (
     CONF_ENABLE_SHUSHU,
     CONF_ENABLE_SHENGRI,
     CONF_CALC_MODE,
+    CONF_BIRTHDAYS,
+    CONF_SYS_TOKEN,
     MODE_ST,
 )
 
@@ -161,3 +163,194 @@ async def test_options_flow_persists_latitude(hass: HomeAssistant) -> None:
     # 清理：卸载实例以取消 coordinator 的定时刷新定时器，避免遗留 timer 导致测试报错
     await hass.config_entries.async_unload(entry.entry_id)
     await hass.async_block_till_done()
+
+
+# ==================== 高级选项：系统令牌与生日 ====================
+
+
+async def _建基础条目(hass: HomeAssistant) -> str:
+    """走用户流建一个默认条目，返回 entry_id。"""
+    流程 = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    创建 = await hass.config_entries.flow.async_configure(
+        流程["flow_id"],
+        {
+            CONF_CUSTOM_LATITUDE: 39.9,
+            CONF_CUSTOM_LONGITUDE: 120.0,
+            CONF_REFRESH_INTERVAL: 1,
+        },
+    )
+    return 创建["result"].entry_id
+
+
+def _选项输入(**覆盖) -> dict:
+    """选项流 init 步骤的完整表单输入。"""
+    输入 = {
+        CONF_CUSTOM_LATITUDE: 39.9,
+        CONF_CUSTOM_LONGITUDE: 120.0,
+        CONF_REFRESH_INTERVAL: 1,
+        CONF_CALC_MODE: MODE_ST,
+        CONF_ENABLE_MORE: False,
+        CONF_ENABLE_CARD: False,
+        CONF_ENABLE_QIHUANG: False,
+        CONF_ENABLE_SHUSHU: False,
+        CONF_ENABLE_SHENGRI: False,
+    }
+    输入.update(覆盖)
+    return 输入
+
+
+async def _清理条目(hass: HomeAssistant) -> None:
+    """等条目恢复 LOADED 后卸载，避免遗留刷新定时器。"""
+    await hass.async_block_till_done()
+    for entry in list(hass.config_entries.async_entries(DOMAIN)):
+        await hass.config_entries.async_unload(entry.entry_id)
+    await hass.async_block_till_done()
+
+
+async def test_options_flow_hides_token_field_by_default(hass: HomeAssistant) -> None:
+    """两个开关未同时开启时不渲染系统令牌输入框。"""
+    entry_id = await _建基础条目(hass)
+
+    opts_result = await hass.config_entries.options.async_init(entry_id)
+    表单键 = {str(k) for k in opts_result["data_schema"].schema}
+
+    assert CONF_ENABLE_QIHUANG in 表单键
+    assert CONF_ENABLE_SHUSHU in 表单键
+    assert CONF_SYS_TOKEN not in 表单键
+
+    await _清理条目(hass)
+
+
+async def test_options_flow_shows_token_field_when_both_enabled(
+    hass: HomeAssistant,
+) -> None:
+    """岐黄与术数同时开启后，再次进入选项页会渲染密钥输入框。"""
+    entry_id = await _建基础条目(hass)
+    entry = hass.config_entries.async_get_entry(entry_id)
+    hass.config_entries.async_update_entry(
+        entry,
+        options={
+            **dict(entry.options),
+            CONF_ENABLE_QIHUANG: True,
+            CONF_ENABLE_SHUSHU: True,
+            CONF_SYS_TOKEN: "旧令牌",
+        },
+    )
+
+    opts_result = await hass.config_entries.options.async_init(entry_id)
+    表单键 = {str(k) for k in opts_result["data_schema"].schema}
+
+    assert CONF_SYS_TOKEN in 表单键
+
+    await _清理条目(hass)
+
+
+async def test_options_flow_saves_new_token(hass: HomeAssistant) -> None:
+    entry_id = await _建基础条目(hass)
+    entry = hass.config_entries.async_get_entry(entry_id)
+    hass.config_entries.async_update_entry(
+        entry,
+        options={
+            **dict(entry.options),
+            CONF_ENABLE_QIHUANG: True,
+            CONF_ENABLE_SHUSHU: True,
+            CONF_SYS_TOKEN: "旧令牌",
+        },
+    )
+
+    opts_result = await hass.config_entries.options.async_init(entry_id)
+    created = await hass.config_entries.options.async_configure(
+        opts_result["flow_id"],
+        _选项输入(
+            **{
+                CONF_ENABLE_QIHUANG: True,
+                CONF_ENABLE_SHUSHU: True,
+                CONF_SYS_TOKEN: "新令牌",
+            }
+        ),
+    )
+
+    assert created["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
+    entry = hass.config_entries.async_get_entry(entry_id)
+    assert entry.options[CONF_SYS_TOKEN] == "新令牌"
+    await _清理条目(hass)
+
+
+async def test_options_flow_clears_token_when_a_switch_is_off(
+    hass: HomeAssistant,
+) -> None:
+    """关闭任一开关时令牌必须清空，避免残留无效授权。"""
+    entry_id = await _建基础条目(hass)
+    entry = hass.config_entries.async_get_entry(entry_id)
+    hass.config_entries.async_update_entry(
+        entry,
+        options={
+            **dict(entry.options),
+            CONF_ENABLE_QIHUANG: True,
+            CONF_ENABLE_SHUSHU: True,
+            CONF_SYS_TOKEN: "旧令牌",
+        },
+    )
+
+    opts_result = await hass.config_entries.options.async_init(entry_id)
+    created = await hass.config_entries.options.async_configure(
+        opts_result["flow_id"],
+        _选项输入(
+            **{
+                CONF_ENABLE_QIHUANG: True,
+                CONF_ENABLE_SHUSHU: False,
+                CONF_SYS_TOKEN: "旧令牌",
+            }
+        ),
+    )
+
+    assert created["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
+    entry = hass.config_entries.async_get_entry(entry_id)
+    assert entry.options[CONF_ENABLE_SHUSHU] is False
+    assert entry.options[CONF_SYS_TOKEN] == ""
+    await _清理条目(hass)
+
+
+async def test_birthdays_step_persists_list(hass: HomeAssistant) -> None:
+    """生日子页提交后写入条目选项。"""
+    entry_id = await _建基础条目(hass)
+
+    opts_result = await hass.config_entries.options.async_init(entry_id)
+    routed = await hass.config_entries.options.async_configure(
+        opts_result["flow_id"],
+        _选项输入(**{CONF_ENABLE_SHENGRI: True}),
+    )
+    assert routed["step_id"] == "birthdays"
+
+    created = await hass.config_entries.options.async_configure(
+        routed["flow_id"],
+        {CONF_BIRTHDAYS: ["张三 1990-10-25", "李四 1995-05-20 农历"]},
+    )
+
+    assert created["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
+    entry = hass.config_entries.async_get_entry(entry_id)
+    assert entry.options[CONF_BIRTHDAYS] == ["张三 1990-10-25", "李四 1995-05-20 农历"]
+    assert entry.options[CONF_ENABLE_SHENGRI] is True
+    await _清理条目(hass)
+
+
+async def test_birthdays_step_backfills_saved_values(hass: HomeAssistant) -> None:
+    """再次进入生日子页时，已保存的生日作为默认值回填。"""
+    entry_id = await _建基础条目(hass)
+    entry = hass.config_entries.async_get_entry(entry_id)
+    hass.config_entries.async_update_entry(
+        entry,
+        options={**dict(entry.options), CONF_BIRTHDAYS: ["王五 1991-01-01"]},
+    )
+
+    opts_result = await hass.config_entries.options.async_init(entry_id)
+    routed = await hass.config_entries.options.async_configure(
+        opts_result["flow_id"], _选项输入(**{CONF_ENABLE_SHENGRI: True})
+    )
+
+    assert routed["step_id"] == "birthdays"
+    生日键 = next(k for k in routed["data_schema"].schema if str(k) == CONF_BIRTHDAYS)
+    assert 生日键.default() == ["王五 1991-01-01"]
+    await _清理条目(hass)

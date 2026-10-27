@@ -4,5 +4,11 @@ __pycache__/
 *.pyo
 *.egg-info/
 .pytest_cache/
+
+
+# Coverage
 .coverage
+coverage.xml
+coverage.lcov
+junit.xml
 htmlcov/
