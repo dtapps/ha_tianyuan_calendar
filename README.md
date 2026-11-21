@@ -118,3 +118,21 @@ https://github.com/dtapps/ha_tianyuan_calendar
 - **为确保集成品牌图片正确显示，请选择 Home Assistant 2026.3+**
 
   为确保品牌图标能够正确显示，建议使用 HA 2026.3 或更高版本。 从 2026.3 起，Home Assistant 引入了 custom_integrations 目录与 Brands Proxy API，自定义集成可以在自身目录中直接包含品牌图片。
+
+## Star 走势
+
+<details>
+<summary><b>点击展开查看图表</b></summary>
+
+[![Star 走势](https://api.star-history.com/chart?repos=dtapps/ha_tianyuan_calendar&type=date&legend=top-left)](https://www.star-history.com/?repos=dtapps%2Fha_tianyuan_calendar&type=date&legend=top-left)
+
+</details>
+
+## 下载量统计图
+
+<details>
+<summary><b>点击展开查看图表</b></summary>
+
+[![下载量统计图](https://release-monitor.com/chart/dtapps/ha_tianyuan_calendar.svg?stable=5)](https://release-monitor.com/#/dtapps/ha_tianyuan_calendar)
+
+</details>
