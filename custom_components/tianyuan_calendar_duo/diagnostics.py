@@ -1,5 +1,4 @@
 """TianYuan 集成诊断支持."""
-
 from __future__ import annotations
 
 from typing import Any
@@ -7,16 +6,15 @@ from typing import Any
 from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN, CONF_SYS_TOKEN, CONF_BIRTHDAYS
+from .const import DOMAIN, CONF_BIRTHDAYS
 from . import TianYuanConfigEntry
-
 
 async def async_get_config_entry_diagnostics(
     hass: HomeAssistant, entry: TianYuanConfigEntry
 ) -> dict[str, Any]:
     """返回配置条目诊断信息。"""
     coordinator = entry.runtime_data
-    options = async_redact_data(dict(entry.options), {CONF_SYS_TOKEN, CONF_BIRTHDAYS})
+    options = async_redact_data(dict(entry.options), {CONF_BIRTHDAYS})
     diagnostics: dict[str, Any] = {
         "domain": DOMAIN,
         "version": entry.version,
@@ -26,7 +24,6 @@ async def async_get_config_entry_diagnostics(
         diagnostics["data_keys"] = sorted(coordinator.data.keys())
 
     return diagnostics
-
 
 async def async_get_device_diagnostics(
     hass: HomeAssistant,

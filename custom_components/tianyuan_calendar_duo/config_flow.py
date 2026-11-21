@@ -24,7 +24,7 @@ from .const import (
     CONF_BIRTHDAYS,
     MODE_ST,
     MODE_TST,
-    CONF_SYS_TOKEN,
+    CONF_PRO_FEATURES,
     DEFAULT_REFRESH_INTERVAL,
 )
 
@@ -116,10 +116,12 @@ class TianYuanOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             self._temp_options.update(user_input)
 
-            if not user_input.get(CONF_ENABLE_QIHUANG) or not user_input.get(
-                CONF_ENABLE_SHUSHU
+            # 专业功能仅在岐黄与术数双开时可用；未双开时强制关闭，避免残留
+            if not (
+                user_input.get(CONF_ENABLE_QIHUANG)
+                and user_input.get(CONF_ENABLE_SHUSHU)
             ):
-                self._temp_options[CONF_SYS_TOKEN] = ""
+                self._temp_options[CONF_PRO_FEATURES] = False
 
             if user_input.get(CONF_ENABLE_SHENGRI):
                 return await self.async_step_birthdays()
@@ -181,14 +183,14 @@ class TianYuanOptionsFlowHandler(config_entries.OptionsFlow):
             ): selector.BooleanSelector(),
         }
 
+        # 专业功能开关：仅岐黄与术数双开时显示，追加在最后
         if opts.get(CONF_ENABLE_QIHUANG) and opts.get(CONF_ENABLE_SHUSHU):
             schema_dict[
-                vol.Optional(CONF_SYS_TOKEN, default=opts.get(CONF_SYS_TOKEN, ""))
-            ] = selector.TextSelector(
-                selector.TextSelectorConfig(
-                    type=selector.TextSelectorType.PASSWORD, autocomplete="off"
+                vol.Required(
+                    CONF_PRO_FEATURES,
+                    default=bool(opts.get(CONF_PRO_FEATURES, False)),
                 )
-            )
+            ] = selector.BooleanSelector()
 
         return self.async_show_form(step_id="init", data_schema=vol.Schema(schema_dict))
 
