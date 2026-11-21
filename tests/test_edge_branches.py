@@ -19,6 +19,7 @@ from custom_components.tianyuan_calendar_duo.const import (
     CONF_ENABLE_MORE,
     CONF_ENABLE_QIHUANG,
     CONF_ENABLE_SHUSHU,
+    CONF_PRO_FEATURES,
     CONF_REFRESH_INTERVAL,
     DOMAIN,
 )
@@ -75,7 +76,7 @@ async def test_文本平台_术数未开启时不创建实体() -> None:
     async_add.assert_not_called()
 
 
-async def test_文本平台_无专业权限时私有输入框被过滤() -> None:
+async def test_文本平台_专业功能关闭时输入框被过滤() -> None:
     async_add = MagicMock()
     await 文本平台.async_setup_entry(
         None, _平台条目(**{CONF_ENABLE_SHUSHU: True}), async_add
@@ -84,12 +85,13 @@ async def test_文本平台_无专业权限时私有输入框被过滤() -> None
     async_add.assert_not_called()
 
 
-async def test_文本平台_有专业权限时创建输入框() -> None:
+async def test_文本平台_专业功能开启时创建输入框() -> None:
     async_add = MagicMock()
-    with patch.object(文本平台, "检查专业权限类", return_value=True):
-        await 文本平台.async_setup_entry(
-            None, _平台条目(**{CONF_ENABLE_SHUSHU: True}), async_add
-        )
+    await 文本平台.async_setup_entry(
+        None,
+        _平台条目(**{CONF_ENABLE_SHUSHU: True, CONF_PRO_FEATURES: True}),
+        async_add,
+    )
 
     新增 = [e for call in async_add.call_args_list for e in call.args[0]]
     assert len(新增) == 1

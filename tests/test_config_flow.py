@@ -17,7 +17,7 @@ from custom_components.tianyuan_calendar_duo.const import (
     CONF_ENABLE_SHENGRI,
     CONF_CALC_MODE,
     CONF_BIRTHDAYS,
-    CONF_SYS_TOKEN,
+    CONF_PRO_FEATURES,
     MODE_ST,
 )
 
@@ -209,8 +209,8 @@ async def _清理条目(hass: HomeAssistant) -> None:
     await hass.async_block_till_done()
 
 
-async def test_options_flow_hides_token_field_by_default(hass: HomeAssistant) -> None:
-    """两个开关未同时开启时不渲染系统令牌输入框。"""
+async def test_options_flow_hides_pro_features_by_default(hass: HomeAssistant) -> None:
+    """两个开关未同时开启时不渲染专业功能开关。"""
     entry_id = await _建基础条目(hass)
 
     opts_result = await hass.config_entries.options.async_init(entry_id)
@@ -218,15 +218,15 @@ async def test_options_flow_hides_token_field_by_default(hass: HomeAssistant) ->
 
     assert CONF_ENABLE_QIHUANG in 表单键
     assert CONF_ENABLE_SHUSHU in 表单键
-    assert CONF_SYS_TOKEN not in 表单键
+    assert CONF_PRO_FEATURES not in 表单键
 
     await _清理条目(hass)
 
 
-async def test_options_flow_shows_token_field_when_both_enabled(
+async def test_options_flow_shows_pro_features_when_both_enabled(
     hass: HomeAssistant,
 ) -> None:
-    """岐黄与术数同时开启后，再次进入选项页会渲染密钥输入框。"""
+    """岐黄与术数同时开启后，再次进入选项页会渲染专业功能开关。"""
     entry_id = await _建基础条目(hass)
     entry = hass.config_entries.async_get_entry(entry_id)
     hass.config_entries.async_update_entry(
@@ -235,19 +235,19 @@ async def test_options_flow_shows_token_field_when_both_enabled(
             **dict(entry.options),
             CONF_ENABLE_QIHUANG: True,
             CONF_ENABLE_SHUSHU: True,
-            CONF_SYS_TOKEN: "旧令牌",
         },
     )
 
     opts_result = await hass.config_entries.options.async_init(entry_id)
     表单键 = {str(k) for k in opts_result["data_schema"].schema}
 
-    assert CONF_SYS_TOKEN in 表单键
+    assert CONF_PRO_FEATURES in 表单键
 
     await _清理条目(hass)
 
 
-async def test_options_flow_saves_new_token(hass: HomeAssistant) -> None:
+async def test_options_flow_saves_pro_features(hass: HomeAssistant) -> None:
+    """保存专业功能开关状态。"""
     entry_id = await _建基础条目(hass)
     entry = hass.config_entries.async_get_entry(entry_id)
     hass.config_entries.async_update_entry(
@@ -256,7 +256,6 @@ async def test_options_flow_saves_new_token(hass: HomeAssistant) -> None:
             **dict(entry.options),
             CONF_ENABLE_QIHUANG: True,
             CONF_ENABLE_SHUSHU: True,
-            CONF_SYS_TOKEN: "旧令牌",
         },
     )
 
@@ -267,21 +266,21 @@ async def test_options_flow_saves_new_token(hass: HomeAssistant) -> None:
             **{
                 CONF_ENABLE_QIHUANG: True,
                 CONF_ENABLE_SHUSHU: True,
-                CONF_SYS_TOKEN: "新令牌",
+                CONF_PRO_FEATURES: True,
             }
         ),
     )
 
     assert created["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
     entry = hass.config_entries.async_get_entry(entry_id)
-    assert entry.options[CONF_SYS_TOKEN] == "新令牌"
+    assert entry.options[CONF_PRO_FEATURES] is True
     await _清理条目(hass)
 
 
-async def test_options_flow_clears_token_when_a_switch_is_off(
+async def test_options_flow_clears_pro_features_when_a_switch_is_off(
     hass: HomeAssistant,
 ) -> None:
-    """关闭任一开关时令牌必须清空，避免残留无效授权。"""
+    """关闭任一开关时专业功能强制关闭，避免残留实体。"""
     entry_id = await _建基础条目(hass)
     entry = hass.config_entries.async_get_entry(entry_id)
     hass.config_entries.async_update_entry(
@@ -290,7 +289,7 @@ async def test_options_flow_clears_token_when_a_switch_is_off(
             **dict(entry.options),
             CONF_ENABLE_QIHUANG: True,
             CONF_ENABLE_SHUSHU: True,
-            CONF_SYS_TOKEN: "旧令牌",
+            CONF_PRO_FEATURES: True,
         },
     )
 
@@ -301,7 +300,6 @@ async def test_options_flow_clears_token_when_a_switch_is_off(
             **{
                 CONF_ENABLE_QIHUANG: True,
                 CONF_ENABLE_SHUSHU: False,
-                CONF_SYS_TOKEN: "旧令牌",
             }
         ),
     )
@@ -309,7 +307,7 @@ async def test_options_flow_clears_token_when_a_switch_is_off(
     assert created["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
     entry = hass.config_entries.async_get_entry(entry_id)
     assert entry.options[CONF_ENABLE_SHUSHU] is False
-    assert entry.options[CONF_SYS_TOKEN] == ""
+    assert entry.options[CONF_PRO_FEATURES] is False
     await _清理条目(hass)
 
 

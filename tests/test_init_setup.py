@@ -11,17 +11,18 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
-from custom_components.tianyuan_calendar_duo import _cleanup_private_entities
+from custom_components.tianyuan_calendar_duo import _cleanup_gated_entities
 from custom_components.tianyuan_calendar_duo.const import (
     CONF_CUSTOM_LATITUDE,
     CONF_CUSTOM_LONGITUDE,
     CONF_ENABLE_CARD,
     CONF_ENABLE_QIHUANG,
     CONF_ENABLE_SHUSHU,
+    CONF_PRO_FEATURES,
     CONF_REFRESH_INTERVAL,
     DOMAIN,
-    QIHUANG_PRIVATE_KEYS,
-    SHUSHU_PRIVATE_KEYS,
+    QIHUANG_PRO_KEYS,
+    SHUSHU_PRO_KEYS,
 )
 
 输入 = {
@@ -146,11 +147,11 @@ async def test_第二个条目不会重复注册静态路径(hass: HomeAssistant
     assert _前端URL(hass) == 首次
 
 
-async def test_无权限时回收岐黄与术数私有实体(hass: HomeAssistant) -> None:
+async def test_专业功能关闭时回收岐黄与术数专业实体(hass: HomeAssistant) -> None:
     entry = await _建条目(hass)
     reg = er.async_get(hass)
-    岐黄键 = next(iter(QIHUANG_PRIVATE_KEYS))
-    术数键 = next(iter(SHUSHU_PRIVATE_KEYS))
+    岐黄键 = next(iter(QIHUANG_PRO_KEYS))
+    术数键 = next(iter(SHUSHU_PRO_KEYS))
 
     岐黄实体 = reg.async_get_or_create(
         "select", DOMAIN, f"{entry.entry_id}_{岐黄键}", config_entry=entry
@@ -169,7 +170,7 @@ async def test_无权限时回收岐黄与术数私有实体(hass: HomeAssistant
 async def test_非本条目前缀的实体不被回收(hass: HomeAssistant) -> None:
     entry = await _建条目(hass)
     reg = er.async_get(hass)
-    键 = next(iter(QIHUANG_PRIVATE_KEYS))
+    键 = next(iter(QIHUANG_PRO_KEYS))
     他人实体 = reg.async_get_or_create(
         "select", DOMAIN, f"other_entry_{键}", config_entry=entry
     )
@@ -180,34 +181,38 @@ async def test_非本条目前缀的实体不被回收(hass: HomeAssistant) -> N
     assert reg.async_get(他人实体.entity_id) is not None
 
 
-async def test_开关开启且有权限时不回收私有实体(hass: HomeAssistant) -> None:
+async def test_开关与专业功能同开时不回收专业实体(hass: HomeAssistant) -> None:
     entry = await _建条目(hass)
     reg = er.async_get(hass)
-    键 = next(iter(QIHUANG_PRIVATE_KEYS))
+    键 = next(iter(QIHUANG_PRO_KEYS))
     实体 = reg.async_get_or_create(
         "select", DOMAIN, f"{entry.entry_id}_{键}", config_entry=entry
     )
-    开关已开的条目 = SimpleNamespace(
-        entry_id=entry.entry_id, data={}, options={CONF_ENABLE_QIHUANG: True}
+    已开的条目 = SimpleNamespace(
+        entry_id=entry.entry_id,
+        data={},
+        options={CONF_ENABLE_QIHUANG: True, CONF_PRO_FEATURES: True},
     )
 
-    _cleanup_private_entities(hass, 开关已开的条目, has_pro_access=True)
+    _cleanup_gated_entities(hass, 已开的条目)
 
     assert reg.async_get(实体.entity_id) is not None
 
 
-async def test_开关开启但无权限时仍回收私有实体(hass: HomeAssistant) -> None:
+async def test_专业功能关闭时仍回收专业实体(hass: HomeAssistant) -> None:
     entry = await _建条目(hass)
     reg = er.async_get(hass)
-    键 = next(iter(QIHUANG_PRIVATE_KEYS))
+    键 = next(iter(QIHUANG_PRO_KEYS))
     实体 = reg.async_get_or_create(
         "select", DOMAIN, f"{entry.entry_id}_{键}", config_entry=entry
     )
-    开关已开的条目 = SimpleNamespace(
-        entry_id=entry.entry_id, data={}, options={CONF_ENABLE_QIHUANG: True}
+    已开的条目 = SimpleNamespace(
+        entry_id=entry.entry_id,
+        data={},
+        options={CONF_ENABLE_QIHUANG: True, CONF_PRO_FEATURES: False},
     )
 
-    _cleanup_private_entities(hass, 开关已开的条目, has_pro_access=False)
+    _cleanup_gated_entities(hass, 已开的条目)
 
     assert reg.async_get(实体.entity_id) is None
 
@@ -217,7 +222,7 @@ async def test_回收时实体已消失不抛异常(
 ) -> None:
     """实体在遍历与删除之间被别的路径移除时，清理逻辑必须静默跳过。"""
     entry = await _建条目(hass)
-    键 = next(iter(QIHUANG_PRIVATE_KEYS))
+    键 = next(iter(QIHUANG_PRO_KEYS))
     状态 = {"尝试删除": False}
 
     class 假注册表:
@@ -240,7 +245,7 @@ async def test_回收时实体已消失不抛异常(
         ],
     )
 
-    _cleanup_private_entities(hass, entry, has_pro_access=False)
+    _cleanup_gated_entities(hass, entry)
 
     assert 状态["尝试删除"] is True
 
